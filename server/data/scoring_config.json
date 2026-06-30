@@ -1,0 +1,11 @@
+{
+  "default": {
+    "id": "default",
+    "community_demand_weight": 0.3,
+    "infrastructure_gap_weight": 0.25,
+    "ai_urgency_weight": 0.2,
+    "vulnerability_weight": 0.15,
+    "recency_weight": 0.1,
+    "updated_at": "2026-06-30T21:09:56.405210"
+  }
+}

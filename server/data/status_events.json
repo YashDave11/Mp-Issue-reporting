@@ -1,0 +1,62 @@
+{
+  "status_event_261f0e83": {
+    "id": "status_event_261f0e83",
+    "issue_id": "issue_001",
+    "from_status": "open",
+    "to_status": "under_review",
+    "changed_by_type": "staff",
+    "changed_by_id": "staff_01",
+    "note": "Status updated to under_review",
+    "created_at": "2026-06-30T21:20:01.508242"
+  },
+  "status_event_d53fc726": {
+    "id": "status_event_d53fc726",
+    "issue_id": "issue_012",
+    "from_status": "open",
+    "to_status": "under_review",
+    "changed_by_type": "staff",
+    "changed_by_id": "staff_01",
+    "note": "Status updated to under_review",
+    "created_at": "2026-06-30T21:25:15.697976"
+  },
+  "status_event_5e24e8c1": {
+    "id": "status_event_5e24e8c1",
+    "issue_id": "issue_012",
+    "from_status": "under_review",
+    "to_status": "planned",
+    "changed_by_type": "staff",
+    "changed_by_id": "staff_01",
+    "note": "Status updated to planned",
+    "created_at": "2026-06-30T21:25:18.077164"
+  },
+  "status_event_9828e5a5": {
+    "id": "status_event_9828e5a5",
+    "issue_id": "issue_012",
+    "from_status": "planned",
+    "to_status": "in_progress",
+    "changed_by_type": "staff",
+    "changed_by_id": "staff_01",
+    "note": "Status updated to in_progress",
+    "created_at": "2026-06-30T21:25:19.097662"
+  },
+  "status_event_09494b3d": {
+    "id": "status_event_09494b3d",
+    "issue_id": "issue_012",
+    "from_status": "in_progress",
+    "to_status": "resolved",
+    "changed_by_type": "staff",
+    "changed_by_id": "staff_01",
+    "note": "Status updated to resolved",
+    "created_at": "2026-06-30T21:25:19.779958"
+  },
+  "status_event_62b13c74": {
+    "id": "status_event_62b13c74",
+    "issue_id": "issue_012",
+    "from_status": "resolved",
+    "to_status": "open",
+    "changed_by_type": "staff",
+    "changed_by_id": "staff_01",
+    "note": "Status updated to open",
+    "created_at": "2026-06-30T21:25:50.173041"
+  }
+}
