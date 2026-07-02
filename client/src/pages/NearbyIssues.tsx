@@ -1,14 +1,17 @@
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { MapPin, MessageSquare, Heart, RefreshCw, Filter } from 'lucide-react';
 import { getNearbyIssues } from '../utils/api';
 import type { IssueRecord } from '../types';
 
 export const NearbyIssues = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  
+  const initialCategory = (location.state as any)?.category || 'all';
+  const [categoryFilter, setCategoryFilter] = useState(initialCategory);
   const [issues, setIssues] = useState<IssueRecord[]>([]);
   const [loading, setLoading] = useState(true);
-  const [categoryFilter, setCategoryFilter] = useState('all');
   
   // Default User Location: Jodhpur Ward 7
   const [userLat] = useState(26.2389);

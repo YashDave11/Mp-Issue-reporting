@@ -1,5 +1,7 @@
 import os
 import uuid
+import hashlib
+import secrets
 import logging
 from typing import List, Optional
 from datetime import datetime
@@ -37,9 +39,84 @@ UPLOADS_DIR = "uploads"
 os.makedirs(UPLOADS_DIR, exist_ok=True)
 app.mount("/uploads", StaticFiles(directory=UPLOADS_DIR), name="uploads")
 
+# Active session tokens: { token -> user_record }
+# In production this would be Redis/DB; for hackathon an in-memory dict is sufficient.
+_active_sessions: dict = {}
+
+def _hash_password(password: str) -> str:
+    return hashlib.sha256(password.encode()).hexdigest()
+
 # --- Helper to create standard response ---
 def make_error_response(message: str):
     return {"status": "error", "message": message}
+
+# ── AUTH ENDPOINTS ──────────────────────────────────────────────────────────
+
+class LoginRequest(BaseModel):
+    username: str
+    password: str
+
+class SignupRequest(BaseModel):
+    username: str
+    password: str
+    role: str = "citizen"
+
+@app.post("/api/auth/login")
+async def auth_login(payload: LoginRequest):
+    """Validates credentials and returns a session token + user record."""
+    users = db.get_data("users")  # dict of { username -> { username, password_hash, role } }
+    user = users.get(payload.username)
+    if not user:
+        raise HTTPException(status_code=401, detail="Invalid username or password.")
+
+    # Accept both plain-text (legacy seed) and sha256 hashes
+    pw_hash = _hash_password(payload.password)
+    stored_hash = user.get("password_hash", "")
+    if stored_hash != pw_hash and stored_hash != payload.password:
+        raise HTTPException(status_code=401, detail="Invalid username or password.")
+
+    token = secrets.token_urlsafe(32)
+    user_record = {
+        "username": user["username"],
+        "role": user["role"],
+        "display_name": user.get("display_name", user["username"]),
+    }
+    _active_sessions[token] = user_record
+    logger.info(f"Login success: {payload.username} ({user_record['role']})")
+    return {"status": "success", "token": token, "user": user_record}
+
+@app.post("/api/auth/signup")
+async def auth_signup(payload: SignupRequest):
+    """Creates a new citizen account and returns a session token."""
+    if payload.role not in ("citizen", "staff", "moderator"):
+        raise HTTPException(status_code=400, detail="Invalid role.")
+    
+    users = db.get_data("users")
+    if payload.username in users:
+        raise HTTPException(status_code=409, detail="Username already taken.")
+    
+    if len(payload.password) < 6:
+        raise HTTPException(status_code=400, detail="Password must be at least 6 characters.")
+    
+    new_user = {
+        "username": payload.username,
+        "password_hash": _hash_password(payload.password),
+        "role": payload.role,
+        "display_name": payload.username,
+    }
+    users[payload.username] = new_user
+    db.save_data("users", users)
+    
+    token = secrets.token_urlsafe(32)
+    user_record = {
+        "username": new_user["username"],
+        "role": new_user["role"],
+        "display_name": new_user["display_name"],
+    }
+    _active_sessions[token] = user_record
+    logger.info(f"Signup success: {payload.username} ({payload.role})")
+    return {"status": "success", "token": token, "user": user_record}
+
 
 # --- ENDPOINT: Upload Media (Images or Audio) ---
 @app.post("/api/upload")

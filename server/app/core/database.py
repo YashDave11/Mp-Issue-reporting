@@ -17,6 +17,16 @@ class LocalJSONDatabase:
         self.status_events_file = os.path.join(self.data_dir, "status_events.json")
         self.area_profiles_file = os.path.join(self.data_dir, "public_area_profiles.json")
         self.scoring_config_file = os.path.join(self.data_dir, "scoring_config.json")
+        self.users_file = os.path.join(self.data_dir, "users.json")
+        
+        # Map of logical name -> filepath for generic access
+        self._file_map: dict = {
+            "issues": self.issues_file,
+            "comments": self.comments_file,
+            "upvotes": self.upvotes_file,
+            "status_events": self.status_events_file,
+            "users": self.users_file,
+        }
         
         # Initialize default files if they don't exist
         self._init_files()
@@ -211,6 +221,23 @@ class LocalJSONDatabase:
             configs = self._read_json(self.scoring_config_file)
             configs["default"] = config_data
             self._write_json(self.scoring_config_file, configs)
+
+    # --- Generic data access (for auth / users) ---
+    def get_data(self, name: str) -> Dict[str, Any]:
+        """Read any named JSON data file."""
+        filepath = self._file_map.get(name)
+        if not filepath:
+            raise ValueError(f"Unknown data file: {name}")
+        with self.lock:
+            return self._read_json(filepath)
+
+    def save_data(self, name: str, data: Dict[str, Any]):
+        """Write any named JSON data file."""
+        filepath = self._file_map.get(name)
+        if not filepath:
+            raise ValueError(f"Unknown data file: {name}")
+        with self.lock:
+            self._write_json(filepath, data)
 
 # Global DB Instance
 db = LocalJSONDatabase()

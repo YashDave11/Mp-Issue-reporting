@@ -84,7 +84,7 @@ export const ReportForm = () => {
       setLoading(true);
       setLoadingStage('Checking duplicates...');
       
-      const res = await checkDuplicates(text, selectedWard.lat, selectedWard.lng);
+      const res = await checkDuplicates(text, selectedWard.lat, selectedWard.lng, selectedWard.name);
       if (res.candidates && res.candidates.length > 0) {
         setDuplicateCandidates(res.candidates);
         setInputTextForDedupe(res.detected_text || text);

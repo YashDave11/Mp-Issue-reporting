@@ -10,23 +10,26 @@ from app.core.database import db
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("ai_pipeline")
 
-# Try to import Google Generative AI SDK
+# Try to import new Google Generative AI SDK (google-genai)
 try:
-    import google.generativeai as genai
+    from google import genai as genai_sdk
+    from google.genai import types as genai_types
     HAS_GENAI = True
 except ImportError:
     HAS_GENAI = False
-    logger.warning("google-generativeai package not found. Running in offline/mock mode.")
+    genai_sdk = None
+    logger.warning("google-genai package not found. Running in offline/mock mode.")
 
 class AIService:
     def __init__(self):
         self.api_key = os.getenv("GEMINI_API_KEY") or os.getenv("GOOGLE_API_KEY")
         self.use_real_ai = HAS_GENAI and self.api_key is not None
+        self.client = None
         
         if self.use_real_ai:
             try:
-                genai.configure(api_key=self.api_key)
-                logger.info("Gemini API client configured successfully.")
+                self.client = genai_sdk.Client(api_key=self.api_key)
+                logger.info("Gemini API client (google.genai) configured successfully.")
             except Exception as e:
                 logger.error(f"Failed to configure Gemini client: {e}. Falling back to mock mode.")
                 self.use_real_ai = False
@@ -46,9 +49,8 @@ class AIService:
         if self.use_real_ai:
             try:
                 logger.info(f"Uploading audio file for transcription: {voice_file_path}")
-                # Upload the file to Gemini File API
-                audio_file = genai.upload_file(path=voice_file_path)
-                model = genai.GenerativeModel("gemini-1.5-flash")
+                with open(voice_file_path, "rb") as f:
+                    audio_bytes = f.read()
                 
                 prompt = (
                     "Transcribe this audio clip exactly as spoken. "
@@ -56,16 +58,18 @@ class AIService:
                     "Return ONLY the transcription text, nothing else."
                 )
                 
-                response = model.generate_content([audio_file, prompt])
-                # Clean up uploaded file
-                genai.delete_file(audio_file.name)
-                
+                response = self.client.models.generate_content(
+                    model="gemini-2.0-flash",
+                    contents=[
+                        genai_types.Part.from_bytes(data=audio_bytes, mime_type="audio/mpeg"),
+                        prompt,
+                    ]
+                )
                 text = response.text.strip()
                 logger.info(f"Successfully transcribed audio using Gemini: '{text}'")
                 return text
             except Exception as e:
                 logger.error(f"Real transcription failed: {e}. Falling back to mock.")
-                # Fallback to mock inside exception
         
         # Mock Transcription based on filename keywords or defaults
         filename = os.path.basename(voice_file_path).lower()
@@ -88,21 +92,21 @@ class AIService:
             
         if self.use_real_ai:
             try:
-                model = genai.GenerativeModel("gemini-1.5-flash")
                 prompt = (
                     f"Analyze this text: '{text}'. "
                     "Determine its language. Translate it to clear English. "
                     "Return ONLY a JSON object in this exact format: "
                     '{"language_code": "hi", "translated_text": "Translated English text"}'
                 )
-                response = model.generate_content(prompt)
+                response = self.client.models.generate_content(
+                    model="gemini-2.0-flash",
+                    contents=prompt,
+                )
                 res_text = response.text.strip()
-                # Clean JSON formatting wrappers if model adds them
                 if res_text.startswith("```json"):
                     res_text = res_text[7:-3].strip()
                 elif res_text.startswith("```"):
                     res_text = res_text[3:-3].strip()
-                    
                 data = json.loads(res_text)
                 return data.get("translated_text", text), data.get("language_code", "en")
             except Exception as e:
@@ -145,9 +149,6 @@ class AIService:
         """
         if self.use_real_ai:
             try:
-                model = genai.GenerativeModel("gemini-1.5-flash")
-                
-                # Setup prompt
                 prompt = (
                     f"Analyze this issue report: '{raw_text}'. "
                     "Categorize it into one of: 'roads', 'sanitation', 'school infrastructure', 'water', 'health', 'public safety'. "
@@ -165,18 +166,19 @@ class AIService:
                     "}"
                 )
                 
-                contents = [prompt]
+                contents: list = [prompt]
                 
-                # If image is attached, upload and send to Gemini
+                # If image is attached, send inline bytes
                 if image_path and os.path.exists(image_path):
                     logger.info(f"Adding image to Gemini model input: {image_path}")
-                    img_file = genai.upload_file(path=image_path)
-                    contents.insert(0, img_file)
+                    with open(image_path, "rb") as img_f:
+                        img_bytes = img_f.read()
+                    contents.insert(0, genai_types.Part.from_bytes(data=img_bytes, mime_type="image/jpeg"))
                     
-                response = model.generate_content(contents)
-                
-                if image_path and os.path.exists(image_path):
-                    genai.delete_file(img_file.name)
+                response = self.client.models.generate_content(
+                    model="gemini-2.0-flash",
+                    contents=contents,
+                )
                     
                 res_text = response.text.strip()
                 if res_text.startswith("```json"):

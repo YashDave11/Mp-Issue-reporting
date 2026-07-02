@@ -791,5 +791,18 @@
     "author_hash": "anon_t82jg3az0l",
     "ai_note": "Comment validation context",
     "created_at": "2026-06-30T21:23:43.264983"
+  },
+  "comment_0ac96438": {
+    "id": "comment_0ac96438",
+    "issue_id": "issue_f8c00955",
+    "text": "hello",
+    "raw_text": "hello",
+    "normalized_text": "hello",
+    "language": "en",
+    "voice_url": null,
+    "image_url": null,
+    "author_hash": "anon_vr5l1p543c",
+    "ai_note": "Comment validation context",
+    "created_at": "2026-07-02T21:13:11.964019"
   }
 }

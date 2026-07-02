@@ -562,3 +562,75 @@ h6, .h6 { font-size: 0.95rem; font-weight: 500; line-height: 1.4; margin-top: 0;
   animation: pulse 2s infinite;
   border-radius: 50%;
 }
+
+/* ────────────────────────────────────────────────────────
+   DIGILOCKER SPECIFIC DESIGN TOKENS (digilocker-DESIGN.md)
+   ──────────────────────────────────────────────────────── */
+:root {
+  --digi-gov-navy: #081854;
+  --digi-primary-blue: #1a73e9;
+  --digi-lavender-surface: #f1eeff;
+  --digi-page-bg: #f4f5f8;
+  --digi-body-text-dark: #212529;
+  --digi-dark-charcoal: #212121;
+  --digi-deep-navy-text: #121224;
+  --digi-navy-link: #000080;
+  --digi-purple-accent: #502ee3;
+  --digi-border-gray: #dddddd;
+  
+  /* Shadows */
+  --shadow-card-subtle: 0px 2px 4px 0px rgba(0, 0, 0, 0.075);
+  --shadow-button-blue-glow: 0px 2px 8px 0px rgba(26, 115, 233, 0.35);
+  --shadow-card-lift: 0px 8px 16px 0px rgba(0, 0, 0, 0.1);
+  --shadow-card-layered: 0px 7px 14px 0px rgba(59, 65, 94, 0.08);
+  --shadow-card-medium: 0px 4px 8px 0px rgba(0, 0, 0, 0.15);
+}
+
+/* Color Utilities */
+.bg-gov-navy { background-color: var(--digi-gov-navy) !important; }
+.text-gov-navy { color: var(--digi-gov-navy) !important; }
+
+.bg-primary-blue { background-color: var(--digi-primary-blue) !important; }
+.text-primary-blue { color: var(--digi-primary-blue) !important; }
+
+.bg-lavender-surface { background-color: var(--digi-lavender-surface) !important; }
+.text-purple-accent { color: var(--digi-purple-accent) !important; }
+
+.bg-digi-gray { background-color: var(--digi-page-bg) !important; }
+.text-deep-navy { color: var(--digi-deep-navy-text) !important; }
+
+/* Border radius utils */
+.rounded-sm-digi { border-radius: 5px !important; }
+.rounded-md-digi { border-radius: 7.9px !important; }
+.rounded-lg-digi { border-radius: 10px !important; }
+.rounded-xl-digi { border-radius: 12px !important; }
+.rounded-2xl-digi { border-radius: 18px !important; }
+.rounded-3xl-digi { border-radius: 20px !important; }
+.rounded-pill-digi { border-radius: 60px !important; }
+.rounded-full-pill-digi { border-radius: 30px !important; }
+
+/* Shadow utils */
+.shadow-card-subtle { box-shadow: var(--shadow-card-subtle) !important; }
+.shadow-blue-glow { box-shadow: var(--shadow-button-blue-glow) !important; }
+.shadow-card-lift { box-shadow: var(--shadow-card-lift) !important; }
+.shadow-card-layered { box-shadow: var(--shadow-card-layered) !important; }
+.shadow-card-medium { box-shadow: var(--shadow-card-medium) !important; }
+
+/* Interactive Hover effects matching DigiLocker card animations */
+.digi-interactive-card {
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+  border: 1px solid var(--digi-border-gray);
+}
+.digi-interactive-card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-card-lift) !important;
+  border-color: var(--digi-primary-blue) !important;
+}
+
+/* Flag strip decoration mimicking India's government portals */
+.gov-flag-strip {
+  height: 4px;
+  width: 100%;
+  background: linear-gradient(to right, #FF9933 0%, #FF9933 33.3%, #FFFFFF 33.3%, #FFFFFF 66.6%, #138808 66.6%, #138808 100%);
+}
+
